@@ -1,0 +1,147 @@
+*** Starting uWSGI 2.0.17 (64bit) on [Wed May 16 15:52:08 2018] ***
+compiled with version: 4.8.5 20150623 (Red Hat 4.8.5-16) on 24 April 2018 13:01:12
+os: Linux-3.10.0-693.el7.x86_64 #1 SMP Tue Aug 22 21:09:27 UTC 2017
+nodename: PandaTest01
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 4
+current working directory: /home/app/flask/uwsgi
+writing pidfile to uwsgi.pid
+detected binary path: /home/app/.virtualenvs/flask_py3/bin/uwsgi
+chdir() to /home/app/product
+your processes number limit is 4096
+your memory page size is 4096 bytes
+detected max file descriptor number: 65535
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uwsgi socket 0 bound to TCP address 127.0.0.1:5000 fd 3
+Python version: 3.6.5 (default, Apr 21 2018, 11:22:53)  [GCC 4.8.5 20150623 (Red Hat 4.8.5-16)]
+Python main interpreter initialized at 0x2939d10
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 416880 bytes (407 KB) for 8 cores
+*** Operational MODE: preforking+threaded ***
+WSGI app 0 (mountpoint='') ready in 0 seconds on interpreter 0x2939d10 pid: 8975 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 8975)
+spawned uWSGI worker 1 (pid: 8988, cores: 2)
+spawned uWSGI worker 2 (pid: 8989, cores: 2)
+spawned uWSGI worker 3 (pid: 8991, cores: 2)
+spawned uWSGI worker 4 (pid: 8993, cores: 2)
+http://10.10.8.81:9999/mon
+[2018-05-16 15:52:22,666] ERROR in app: Exception on /apply [POST]
+Traceback (most recent call last):
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connection.py", line 141, in _new_conn
+    (self.host, self.port), self.timeout, **extra_kw)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/util/connection.py", line 83, in create_connection
+    raise err
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connectionpool.py", line 357, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "/usr/local/lib/python3.6/http/client.py", line 1239, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/usr/local/lib/python3.6/http/client.py", line 1285, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/usr/local/lib/python3.6/http/client.py", line 1234, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/usr/local/lib/python3.6/http/client.py", line 1026, in _send_output
+    self.send(msg)
+  File "/usr/local/lib/python3.6/http/client.py", line 964, in send
+    self.connect()
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connection.py", line 166, in connect
+    conn = self._new_conn()
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connection.py", line 150, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x7f2e585cafd0>: Failed to establish a new connection: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/urllib3/util/retry.py", line 388, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='10.10.8.81', port=9999): Max retries exceeded with url: /mon (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f2e585cafd0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask/app.py", line 1612, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask/app.py", line 1598, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask_restful/__init__.py", line 480, in wrapper
+    resp = resource(*args, **kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask/views.py", line 84, in view
+    return self.dispatch_request(*args, **kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask_restful/__init__.py", line 595, in dispatch_request
+    resp = meth(*args, **kwargs)
+  File "service.py", line 30, in post
+    res = requests.post(url,data)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/api.py", line 112, in post
+    return request('post', url, data=data, json=json, **kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/sessions.py", line 508, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/sessions.py", line 618, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/requests/adapters.py", line 508, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='10.10.8.81', port=9999): Max retries exceeded with url: /mon (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f2e585cafd0>: Failed to establish a new connection: [Errno 111] Connection refused',))
+{address space usage: 316690432 bytes/302MB} {rss usage: 23748608 bytes/22MB} [pid: 8991|app: 0|req: 1/1] 10.10.8.81 () {40 vars in 554 bytes} [Wed May 16 15:52:22 2018] POST /apply => generated 37 bytes in 10 msecs (HTTP/1.1 500) 2 headers in 90 bytes (1 switches on core 0)
+SIGINT/SIGQUIT received...killing workers...
+worker 1 buried after 1 seconds
+worker 2 buried after 1 seconds
+worker 3 buried after 1 seconds
+worker 4 buried after 1 seconds
+goodbye to uWSGI.
+*** Starting uWSGI 2.0.17 (64bit) on [Wed May 16 15:55:38 2018] ***
+compiled with version: 4.8.5 20150623 (Red Hat 4.8.5-16) on 24 April 2018 13:01:12
+os: Linux-3.10.0-693.el7.x86_64 #1 SMP Tue Aug 22 21:09:27 UTC 2017
+nodename: PandaTest01
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 4
+current working directory: /home/app/flask/uwsgi
+writing pidfile to uwsgi.pid
+detected binary path: /home/app/.virtualenvs/flask_py3/bin/uwsgi
+chdir() to /home/app/flask
+your processes number limit is 4096
+your memory page size is 4096 bytes
+detected max file descriptor number: 65535
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uwsgi socket 0 bound to TCP address 127.0.0.1:5000 fd 3
+Python version: 3.6.5 (default, Apr 21 2018, 11:22:53)  [GCC 4.8.5 20150623 (Red Hat 4.8.5-16)]
+Python main interpreter initialized at 0x1a2bd70
+python threads support enabled
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 416880 bytes (407 KB) for 8 cores
+*** Operational MODE: preforking+threaded ***
+/home/app/.virtualenvs/flask_py3/lib/python3.6/site-packages/flask_sqlalchemy/__init__.py:794: FSADeprecationWarning: SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will be disabled by default in the future.  Set it to True or False to suppress this warning.
+  'SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and '
+WSGI app 0 (mountpoint='') ready in 1 seconds on interpreter 0x1a2bd70 pid: 9167 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 9167)
+spawned uWSGI worker 1 (pid: 9178, cores: 2)
+spawned uWSGI worker 2 (pid: 9179, cores: 2)
+spawned uWSGI worker 3 (pid: 9181, cores: 2)
+spawned uWSGI worker 4 (pid: 9183, cores: 2)
+http://10.10.8.81:9999/mon
+{'pdname': 'aaa', 'seed': '2'}
+{address space usage: 337891328 bytes/322MB} {rss usage: 34279424 bytes/32MB} [pid: 9178|app: 0|req: 1/1] 10.10.8.81 () {40 vars in 554 bytes} [Wed May 16 15:55:56 2018] POST /apply => generated 4 bytes in 24 msecs (HTTP/1.1 201) 3 headers in 107 bytes (1 switches on core 0)

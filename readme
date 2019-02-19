@@ -1,0 +1,17 @@
+#beehive
+准备工作
+    1、搭建python环境及虚拟环境
+    2、搭建mysql
+    3、搭建redis
+    4、将依赖库进行安装
+    5、创建数据库表‘beehive’
+    6、修改mysql配置并迁移数据表python manager create
+    7、导入目录数据
+
+启动主程序
+    shell中执行python manager.py runserver 会启动服务
+    shell中执行python manager.py shell 会引入框架包进入命令行
+    shell中执行python manager.py db 会启动迁移服务
+备注：
+    报错：sqlalchemy.exc.NoSuchModuleError: Can't load plugin: sqlalchemy.dialects:mysql.pymysql
+    尝试卸载flask-sqlalchemy和sqlalchemy并重新安装flask-sqlalchemy，检查config中sql的配置地址

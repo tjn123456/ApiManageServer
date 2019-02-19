@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <title>Bootstrap 模板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--loading样式-->
+    <link rel="stylesheet" type="text/css" href="../static/css/loading.css"/>
+    <!-- 引入 Bootstrap -->
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css" type="text/css">
+	<!--引入jquery-->
+    <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <!--layer用于弹层事件及样式-->
+    <script src="../static/js/layer/layer.js"></script>
+    <script>
+	  	$(document).ready(function(){
+//	  		单次monkey请求
+			$("form").submit(function(e){
+			  	e.preventDefault()
+			  	  var load = layer.load(2);
+				  var pdname=$("#pdname").val();
+				  var seed = $("#seed").val();
+				  $.post("http://10.10.8.81:8000/apply",{pdname:pdname,seed:seed},function(data){
+				    jso = jQuery.parseJSON(data);
+				    alert(jso);
+				    $("#log").append("<p>" + jso.text + "</p>");
+				    layer.close(load);
+				  });
+			});
+			$("#pdname").click(function(){
+				layer.tips('adb shell dumpsys window | findstr mCurrentFocus命令可查看当前运行包名称', '#pdname', {
+				  tips: [1,] //还可配置颜色
+				});
+			});
+			$("#seed").click(function(){
+				layer.tips('输入数字，或失败的任务编号', '#seed', {
+				  tips: [1, ] //还可配置颜色
+				});
+			});
+		})
+	
+	  </script>
+    </head>
+    
+    
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">首页</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">需求管理</a></li>
+            <li><a href="#about">API测试</a></li>
+            <li><a href="#contact">任务列表</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    
+
+	<div class="container theme-showcase" role="main">
+
+      <!-- Main jumbotron for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <h1>Monkey test</h1>
+        <li>准备工作</li>
+        <li>1、搭建java环境及sdk环境</li>
+        <li>2、将手机连接至本机电脑</li>
+        <li>3、将手机USB调试打开，保持本机5037端口未被占用</li>
+      </div>
+      	<form>
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">包名称</label>
+		    <input type="text" name="pdname" class="form-control" id="pdname" placeholder="输入包名称">
+		  </div>
+		  <div class="form-group">
+		    <label for="exampleInputEmail1">任务序号</label>
+		    <input type="text" name="seed" class="form-control" id="seed" placeholder="输入任务序号">
+		  </div>
+		 
+		  <button type="submit" class="btn btn-default">提交</button>
+		</form>
+	  <!--<button id="test2">运行上述例子</button>-->
+      <div class="jumbotron" id="log">
+      		<b>任务日志</b>
+      </div>
+      
+	</div>
+	 
+	 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+      <!-- jQuery (Bootstrap 的 JavaScript 插件需要引入 jQuery) -->
+      <script src="https://code.jquery.com/jquery.js"></script>
+      <!-- 包括所有已编译的插件 -->
+      <script src="../static/js/bootstrap.min.js"></script>
+	
+</body>
+
+</html>
