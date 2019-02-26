@@ -3,6 +3,7 @@ from flask import Flask
 from flask_restful import Api,Resource
 from flask_sqlalchemy import SQLAlchemy
 from config import config
+from flask_cors import CORS
 
 '''
     app默认加载内容
@@ -20,6 +21,7 @@ def create_app(config_name):
     增加接口路由
     '''
     app = Flask(__name__)
+    CORS(app, supports_credentials=True)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     db.init_app(app)

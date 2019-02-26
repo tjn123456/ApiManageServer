@@ -9,7 +9,6 @@
 import hashlib
 import sys
 import base64
-from ...model_path import Fun_path
 import logging
 import logging.handlers
 import datetime
@@ -31,29 +30,6 @@ def encrypt(token_str):
 def decrypt(token):
     token_str = base64.b64decode(token)
     return token_str.decode()
-
-def get_fun_path(classify,dbobj):
-    """此函数复用时需注意数据表对应的字段名称统一"""
-    data = Fun_path.query.filter_by(classify=classify).all()
-    list = []
-    son = {}
-    for i in data:
-        dict = {'id': i.id, 'text': i.name, 'value': i.fun_id, 'item': ''}
-        if i.fa_id:
-            dict2 = {'id': i.id, 'text': i.name, 'value': i.fun_id}
-            if i.fa_id not in son.keys():
-                son[i.fa_id] = []
-            son[i.fa_id].append(dict2)
-        else:
-            list.append(dict)
-    #print('*' * 30, son, list)
-    for i in son.keys():
-        for a in list:
-            if i == str(a['id']):
-                a['item'] = son[i]
-    result = {}
-    result["row"] = list
-    return result
 
 def logger_init():
     logger = log_config["logger"]

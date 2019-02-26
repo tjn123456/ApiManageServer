@@ -141,7 +141,6 @@ class Get_Api_info(Resource):
         '''
         args = parser.parse_args()
         case_id = args['apicase_id']
-        print("1234567890",print(case_id == ''))
         api_id = args["api_id"]
         api_ids = [i.id for i in Api_info.query.all()]
         print('#' * 10, case_id,api_id)
