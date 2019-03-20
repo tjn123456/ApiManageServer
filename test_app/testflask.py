@@ -1,65 +1,62 @@
-# -*- coding: utf-8 -*-
 from flask import Flask
-from flask_restful import reqparse,Resource,request,Api
-import sys
-import random
-import time
-from redis import Redis
-from rq import Queue
-
-sys.path.append("..")
-from test_app import user_valid
-
-parser = reqparse.RequestParser()
-parser.add_argument('username', type=str)
-parser.add_argument('password', type=str)
-
+from flask.ext.restful import reqparse, abort, Api, Resource
 
 app = Flask(__name__)
-app.config["CELERY_BROKER_URL"]='redis://127.0.0.1:6379/1'
-app.config['result_backend']='redis://127.0.0.1:6379/3'
 api = Api(app)
-print(app.name)
+
+TODOS = {
+    'todo1': {'task': 'build an API'},
+    'todo2': {'task': '?????'},
+    'todo3': {'task': 'profit!'},
+}
 
 
+def abort_if_todo_doesnt_exist(todo_id):
+    if todo_id not in TODOS:
+        abort(404, message="Todo {} doesn't exist".format(todo_id))
+
+parser = reqparse.RequestParser()
+parser.add_argument('task', type=str)
 
 
-def long_task(self):
-    """Background task that runs a long function with progress reports."""
-    verb = ['Starting up', 'Booting', 'Repairing', 'Loading', 'Checking']
-    adjective = ['master', 'radiant', 'silent', 'harmonic', 'fast']
-    noun = ['solar array', 'particle reshaper', 'cosmic ray', 'orbiter', 'bit']
-    message = ''
-    total = 100
-    print(123)
-    for i in range(total):
-        if not message or random.random() < 0.25:
-            message = '{0} {1} {2}...'.format(random.choice(verb),
-                                              random.choice(adjective),
-                                              random.choice(noun))
-        self.update_state(state='PROGRESS',
-                          meta={'current': i,'total': total,'status': message})
-        print(message)
-        time.sleep(1)
-    return {'current': 100, 'total': 100, 'status': 'Task completed!',
-            'result': 42}
+# Todo
+#   show a single todo item and lets you delete them
+class Todo(Resource):
+    def get(self, todo_id):
+        abort_if_todo_doesnt_exist(todo_id)
+        return TODOS[todo_id]
 
-q = Queue(connection=Redis())
-def abc(a):
-    for i in range(10):
-        print(i)
-        time.sleep(1)
-    return a
+    def delete(self, todo_id):
+        abort_if_todo_doesnt_exist(todo_id)
+        del TODOS[todo_id]
+        return '', 204
 
-class todo(Resource):
+    def put(self, todo_id):
+        args = parser.parse_args()
+        task = {'task': args['task']}
+        TODOS[todo_id] = task
+        return task, 201
+
+
+# TodoList
+#   shows a list of all todos, and lets you POST to add new tasks
+class TodoList(Resource):
     def get(self):
-        job = q.enqueue(abc,'dd')
-        return {'text': 'success'}, 201, {"Access-Control-Allow-Origin": "*"}
+        return TODOS
 
+    def post(self):
+        args = parser.parse_args()
+        todo_id = int(max(TODOS.keys()).lstrip('todo')) + 1
+        todo_id = 'todo%i' % todo_id
+        TODOS[todo_id] = {'task': args['task']}
+        return TODOS[todo_id], 201
 
-api.add_resource(todo,'/task')
+##
+## Actually setup the Api resource routing here
+##
+api.add_resource(TodoList, '/todos')
+api.add_resource(Todo, '/todos/<todo_id>')
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",port=5001,debug=True)
-
+    app.run(debug=True)

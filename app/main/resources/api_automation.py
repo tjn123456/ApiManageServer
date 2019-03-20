@@ -10,6 +10,7 @@ from ...model_path import Fun_path
 from ..basic import base
 sys.path.append("....")
 from app import db
+import json
 
 parser = reqparse.RequestParser()
 parser.add_argument('api_id',type=str)
@@ -18,13 +19,15 @@ parser.add_argument('operation',type=str)
 parser.add_argument('apicasename',type=str)
 parser.add_argument('apicase_id',type=str)
 parser.add_argument("api_tree_id",type=str)
+parser.add_argument("data",type=str)
 
 
-def change(dict):
-    #获取参数数据中第一个key值
-    data = sorted(dict.items())[0][0]
-    data = eval(data)
-    return data
+
+def change(list):
+    dict = {}
+    for i in list:
+        dict[i['key']] = i['value']
+    return dict
 
 def get_args(list):
     #拆解列表返回参数字典
@@ -32,6 +35,85 @@ def get_args(list):
     for (a,b,c) in list:
         valdict[a] = b
     return valdict
+
+debug_result = {}
+def debug(*args):
+    for index, value in enumerate(args):
+        debug_result['arg' + str(index)] = value
+    # result = {}
+    # for i in args:
+    #     result[i]=eval(i)
+    return debug_result
+
+
+def perform_api(api_id,case_id):
+    api_info = Api_info.query.filter(Api_info.id == api_id).first()
+    api_case = Apicase_info.query.filter(Apicase_info.id == case_id).first()
+    if api_case and api_id:
+        # 参数解析
+        api_req_action = api_info.httpact
+        api_req_url = 'http://'+ api_info.requrl
+        api_req_params = change(eval(api_case.params))
+        api_req_bodys = change(eval(api_case.bodys))
+        api_req_headers = change(eval(api_case.headers))
+        api_req_befun = api_case.beforefunction
+        api_req_assfun = api_case.assertfunction
+    else:
+        return {'status':'faild','text':'参数错误'}
+    #执行前置脚本
+    try:
+        exec(api_req_befun)
+        if 'debug' in api_req_befun:
+            return {'status': 'blocking', 'text': '接口阻塞调试中', 'result': debug_result}
+    except BaseException as e:
+        return {'status':'failed','text':'前置脚本错误'+str(e)}
+
+    if api_req_headers != []:
+        if api_req_action == 'GET':
+            try:
+                rsp = get(url=api_req_url, params=api_req_params, data=api_req_bodys,headers=api_req_headers).json()
+            except BaseException as e:
+                return {'status': 'failed', 'text': '请求失败' + str(e)}
+        elif api_req_action == 'POST':
+            try:
+                rsp = post(url=api_req_url, params=api_req_params, data=api_req_bodys, headers=api_req_headers).json()
+                # return {status: true, text: '接口请求成功', result: rsp}
+            except BaseException as e:
+                return {'status': 'failed', 'text': '请求失败' + str(e)}
+        else:
+            return {'status': 'failed', 'text': 'HTTP请求方法无效'}
+    else:
+        if api_req_action == 'GET':
+            try:
+                rsp = get(url=api_req_url, params=api_req_params, data=api_req_bodys).json()
+            except BaseException as e:
+                return {'status': 'failed', 'text': '请求失败' + str(e)}
+        elif api_req_action == 'POST':
+            try:
+                rsp = post(url=api_req_url, params=api_req_params, data=api_req_bodys).json()
+            except BaseException as e:
+                return {'status': 'failed', 'text': '请求失败' + str(e)}
+        else:
+            return {'status': 'failed', 'text': 'HTTP请求方法无效'}
+    #执行断言脚本
+    try:
+        exec (api_req_assfun)
+        if 'debug' in api_req_befun:
+            return {'status': 'blocking', 'text': '接口阻塞调试中', 'result': debug_result}
+    except BaseException as e:
+        return {'status': 'failed', 'text': '断言失败' + str(e)}
+    return {'status': 'success', 'text': '执行成功','result':rsp}
+
+
+class Get_All_apiids(Resource):
+    def get(self):
+        data = [{'api_id':i.id,'api_name':i.name} for i in Api_info.query.all()]
+        return {'text':'success',"data":data}, 201,{"Access-Control-Allow-Origin": "*"}
+
+
+
+
+
 
 class api_single(Resource):
     '''
@@ -53,52 +135,24 @@ class api_single(Resource):
     '''
     #断言部分未完成
     def post(self):
-        # args = parser.parse_args()
-        data = request.form.to_dict()
-        datadict = change(data)
-        requrl,params,httpaction,headers,bodys = datadict["requrl"],datadict["params"],datadict["httpaction"],datadict["headers"],datadict["bodys"]
-        befun,assfun= datadict['befun'],datadict['assfun']
-        params = get_args(params)
-        bodys = get_args(bodys)
-        headers = get_args(headers)
-        #执行前置脚本
-        try:
-            exec(befun)
-        except BaseException as e:
-            return {'text': 'faild', "data":['前置脚本异常',str(e)]}, 202, {"Access-Control-Allow-Origin": "*"}
-        #拿取关键字信息
-        rekeys = {}
-        # if isinstance(bekeys,list):
-        #     for i in bekeys:
-        #         rekeys[i] = eval(i)
-        if httpaction == 'GET':
-            print("#"*20,requrl,params,bodys,headers)
-            rsp = get(url=requrl,params=params,data=bodys).text
-            print(rsp)
-        elif httpaction == 'POST':
-            try:
-                print("#"*50,requrl,params,bodys,headers)
-                rsp = post(url=requrl,params=params,data=bodys,headers=headers).text
-            except BaseException as e:
-                return {'text': 'faild', "data":['接口请求错误',str(e)] }, 202, {"Access-Control-Allow-Origin": "*"}
-            rsp = rsp.encode().decode('utf-8')
-        elif httpaction == 'HEAD':
-            rsp = head(url=requrl,params=params,data=bodys,headers=headers).text
-        else :
-            return {'text': 'faild', "data": 'HTTP请求方法无效'}, 202, {"Access-Control-Allow-Origin": "*"}
-        try:
-            exec(assfun)
-        except BaseException as e:
-            return {'text': 'faild', "data":['断言失败',str(e)]}, 202, {"Access-Control-Allow-Origin": "*"}
-        # if isinstance(asskeys,list):
-        #     for i in bekeys:
-        #         rekeys[i] = eval(i)
-        return {'text':'success',"data":[rsp,rekeys]}, 201,{"Access-Control-Allow-Origin": "*"}
+        args = parser.parse_args()
+        case_id = args['apicase_id']
+        api_id = args["api_id"]
+        result = perform_api(api_id,case_id)
+        print(result)
+        if result['status'] == 'success':
+            return {'status':'success',"data":result['result']}, 201,{"Access-Control-Allow-Origin": "*"}
+        elif result['status'] == "blocking":
+            return {'status':'blocking','data':result['result']}, 202, {"Access-Control-Allow-Origin": "*"}
+        elif result['status'] == "failed":
+            return {'status': 'failed', "data": result['text']}, 202, {"Access-Control-Allow-Origin": "*"}
+
+
 
 class save_apiandcase(Resource):
     def post(self):
-        data = request.form.to_dict()
-        datadict = change(data)
+        args = parser.parse_args()
+        datadict = json.loads(args['data'])
         api_id,requrl,params,httpaction,headers,bodys,case_id,apicasedetail = datadict["api_id"],datadict["requrl"],datadict["params"],datadict["httpaction"],datadict["headers"],datadict["bodys"],datadict["case_id"],datadict["apicasedetail"]
         befun,assfun = datadict['befun'],datadict['assfun']
         #根据该接口的id更新接口内容
@@ -114,6 +168,7 @@ class save_apiandcase(Resource):
         #根据用例的id更新用例内容
         api_case = Apicase_info.query.filter(Apicase_info.id==case_id).first()
         if api_case:
+            print(headers,params)
             api_case.params = str(params)
             api_case.bodys = str(bodys)
             api_case.headers = str(headers)
@@ -129,6 +184,7 @@ class save_apiandcase(Resource):
         return {'text':'success'}, 201,{"Access-Control-Allow-Origin": "*"}
 
 class Get_Api_info(Resource):
+
     def post(self):
         '''
         方法：post
@@ -142,8 +198,9 @@ class Get_Api_info(Resource):
         args = parser.parse_args()
         case_id = args['apicase_id']
         api_id = args["api_id"]
+        apicase_ids = [i.id for i in Apicase_info.query.all()]
         api_ids = [i.id for i in Api_info.query.all()]
-        print('#' * 10, case_id,api_id)
+        print(api_ids,api_id)
         if case_id is None or case_id == "" and int(api_id) in api_ids:
             #获取接口信息
             api = Api_info.query.filter_by(id=api_id).first()
@@ -151,11 +208,11 @@ class Get_Api_info(Resource):
             case_info = [{'case_id':i.id,'casename':i.casename} for i in api_case]
             print('#'*10,case_info)
             data = {'httpaction':api.httpact,'requrl':api.requrl,'case_id':case_info}
-        elif int(api_id) in api_ids:
+        elif case_id !='' or case_id is not None:
             #获取用例信息
-            print(api_id)
             api_case = Apicase_info.query.filter_by(id=int(case_id)).first()
-            data = {'params':api_case.params,'headers':api_case.headers,'body':api_case.bodys,'casename':api_case.casename,'assfun':api_case.assertfunction,'befun':api_case.beforefunction}
+            print(type(api_case.headers))
+            data = {'params':eval(api_case.params),'headers':eval(api_case.headers),'bodys':eval(api_case.bodys),'casename':api_case.casename,'assfun':api_case.assertfunction,'befun':api_case.beforefunction}
         else:
             return {'text':'faild',"data":'输入参数错误'},201,{"Access-Control-Allow-Origin": "*"}
         return {'text':'success',"data":data},201,{"Access-Control-Allow-Origin": "*"}
@@ -179,7 +236,7 @@ class create_apicase(Resource):
             return {'text':'必填项不能为空'},601,{"Access-Control-Allow-Origin": "*"}
         #增加apicase_info数据
         base.logger.info("api_automation.create_apicase,Apicase_info insert,casename:{0},api_id:{1}".format(casename,api_id))
-        api_case = Apicase_info(api_id=int(api_id),casename=casename)
+        api_case = Apicase_info(api_id=int(api_id),casename=casename,params='[]',headers="[{'key':'Accept','value':'application/json'}]",bodys='[]')
         db.session.add(api_case)
         db.session.commit()
         case = Apicase_info.query.filter_by(api_id=int(api_id),casename=casename).all()

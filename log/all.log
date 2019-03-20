@@ -1,1 +1,3 @@
-2018-12-05 16:24:47,642 - INFO - user:tjn,password:e10adc3949ba59abbe56e057f20f883e
+2019-03-20 14:24:28,364 - INFO - api_automation.create_apicase,Apicase_info insert,casename:ÓÃÀý1,api_id:37
+2019-03-20 14:24:28,623 - INFO - api_automation.create_apicase,create_success,caseid:44
+2019-03-20 14:24:54,520 - INFO - api_automation.save_apiandcase--save success}

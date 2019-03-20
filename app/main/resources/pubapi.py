@@ -72,7 +72,6 @@ class Api_Path(Resource):
 
         parent_obj = Fun_path.query.filter(Fun_path.fun_id == '' ).all()
         parent = [{'id': str(i.id), 'text': i.name,} for i in parent_obj]
-        print(parent)
         result = {}
         result["menu"] = list
         result["parent"] = parent
@@ -87,7 +86,6 @@ class Api_Path(Resource):
         #type 1 是目录，2是接口
         type = args["add_type"]
         api_ids = [i.id for i in Fun_path.query.all()]
-        print(api_tree_id,'########################')
         if api_tree_id =='':
             if type == '1':
                 #增加目录
@@ -97,7 +95,7 @@ class Api_Path(Resource):
             elif type =='2':
                 #增加接口
                 # 增加空的接口信息获取fun_id
-                addapiinfo = Api_info(apiname='', apidetail='', httpact='', requrl='', case_id='')
+                addapiinfo = Api_info(apiname=api_name, apidetail='', httpact='', requrl='', case_id='')
                 db.session.add(addapiinfo)
                 db.session.commit()
                 #增加子目录
